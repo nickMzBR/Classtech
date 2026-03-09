@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classtech - Upgrade</title>
+    <style>
+        :root {
+            --bg-dark: #222;
+            --card-bg: #2a2a2a;
+            --accent-blue: #007bff;
+            --vibrant-blue: #00d4ff;
+            --text-main: #ffffff;
+            --text-dim: #aaa;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 90%; max-width: 1000px; text-align: center; }
+
+        h1 { margin-bottom: 40px; color: var(--vibrant-blue); text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Grade de Planos */
+        .plans-grid {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-blue);
+            border-radius: 15px;
+            padding: 30px;
+            width: 280px;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .card:hover { transform: translateY(-10px); border-color: var(--vibrant-blue); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2); }
+
+        .card h3 { color: var(--vibrant-blue); margin-top: 0; }
+        .price { font-size: 2.5rem; font-weight: bold; margin: 20px 0; }
+        .price span { font-size: 1rem; color: var(--text-dim); }
+
+        ul { list-style: none; padding: 0; text-align: left; margin: 30px 0; }
+        ul li { margin: 12px 0; color: #eee; display: flex; align-items: center; }
+        ul li::before { content: '✓'; color: var(--vibrant-blue); margin-right: 10px; font-weight: bold; }
+
+        .btn-select {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-select:hover { background: var(--vibrant-blue); transform: scale(1.05); }
+
+        /* Tela de Pagamento (Escondida Inicialmente) */
+        #payment-screen {
+            display: none;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid var(--vibrant-blue);
+            width: 400px;
+            margin: 0 auto;
+        }
+
+        .payment-info { text-align: left; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .qr-placeholder {
+            background: white;
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="main-container">
+        <h1>Classtech Premium</h1>
+        
+        <div class="plans-grid" id="plans-grid">
+            <div class="card">
+                <h3>BRONZE</h3>
+                <p class="price">R$ 4,99<span>/mês</span></p>
+                <ul>
+                    <li>ClassBot Unlocked</li>
+                    <li>Second Brain (2 IAs)</li>
+                    <li>Bypass Escolar Básico</li>
+                </ul>
+                <button class="btn-select" onclick="openPayment('BRONZE', '4,99')">Selecionar</button>
+            </div>
+
+            <div class="card">
+                <h3>PRATA</h3>
+                <p class="price">R$ 6,99<span>/mês</span></p>
+                <ul>
+                    <li>Tudo do Bronze</li>
+                    <li>Proxy Web Ultra-Rápido</li>
+                    <li>Temas Dark Custom</li>
+                </ul>
+                <button class="btn-select" onclick="openPayment('PRATA', '6,99')">Selecionar</button>
+            </div>
+
+            <div class="card">
+                <h3>OURO</h3>
+                <p class="price">R$ 9,99<span>/mês</span></p>
+                <ul>
+                    <li>Tudo do Prata</li>
+                    <li>ClassPlay Pro (50+ Games)</li>
+                    <li>Suporte Prioritário</li>
+                </ul>
+                <button class="btn-select" onclick="openPayment('OURO', '9,99')">Selecionar</button>
+            </div>
+        </div>
+
+        <div id="payment-screen">
+            <h2 id="selected-plan-name">Plano</h2>
+            <div class="payment-info">
+                <p>Valor a pagar: <strong id="selected-price">R$ 0,00</strong></p>
+            </div>
+            
+            <div class="input-group">
+                <label>E-mail do ClassHub</label>
+                <input type="email" placeholder="seuemail@exemplo.com">
+            </div>
+
+            <div class="qr-placeholder">PIX QR CODE</div>
+            <p style="font-size: 0.8rem; color: #888;">Escaneie o código acima para ativar sua conta na Classtech.</p>
+            
+            <button class="btn-select" onclick="backToPlans()" style="background: transparent; border: 1px solid #555; margin-top: 10px;">Voltar</button>
+        </div>
+    </div>
+
+    <script>
+        function openPayment(plan, price) {
+            document.getElementById('plans-grid').style.display = 'none';
+            document.getElementById('payment-screen').style.display = 'block';
+            document.getElementById('selected-plan-name').innerText = 'Upgrade: ' + plan;
+            document.getElementById('selected-price').innerText = 'R$ ' + price;
+        }
+
+        function backToPlans() {
+            document.getElementById('plans-grid').style.display = 'flex';
+            document.getElementById('payment-screen').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
