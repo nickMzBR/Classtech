@@ -3,110 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classtech Hub</title>
+    <title>Classtech | Planos</title>
     <style>
         :root { --bg: #0c0c0c; --card: #161616; --blue: #007aff; --text: #ffffff; --dim: #888; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .brand { position: absolute; top: 25px; left: 25px; font-weight: 800; color: var(--blue); }
-        .card { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid #222; width: 320px; text-align: center; }
-        input { width: 100%; padding: 14px; margin: 10px 0; background: #222; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; outline: none; }
-        .btn { background: var(--blue); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 15px; }
-        #pricing { display: none; width: 90%; max-width: 900px; text-align: center; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .brand { position: absolute; top: 25px; left: 25px; font-weight: 800; color: var(--blue); font-size: 1.2rem; }
+        
+        /* Card de Login */
+        .auth-card { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid #222; width: 300px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { margin-bottom: 20px; font-weight: 700; }
+        input { width: 100%; padding: 14px; margin: 10px 0; background: #222; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--blue); box-shadow: 0 0 10px rgba(0, 122, 255, 0.2); }
+        
+        .btn { background: var(--blue); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 15px; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: scale(0.98); }
+        
+        .toggle-link { font-size: 0.8rem; color: var(--dim); cursor: pointer; margin-top: 20px; display: block; }
+
+        /* Grid de Planos */
+        #pricing-section { display: none; width: 90%; max-width: 900px; text-align: center; animation: fadeIn 0.5s ease; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
-        .plan { background: var(--card); padding: 30px; border-radius: 24px; border: 1px solid #222; cursor: pointer; transition: 0.3s; }
-        .plan:hover { border-color: var(--blue); transform: translateY(-5px); }
-        #user-info { position: absolute; top: 25px; right: 25px; font-size: 0.85rem; display: none; }
-        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+        .plan-card { background: var(--card); padding: 30px; border-radius: 24px; border: 1px solid #222; transition: 0.4s; cursor: pointer; }
+        .plan-card:hover { border-color: var(--blue); transform: translateY(-5px); background: #1a1a1a; }
+        .plan-card h3 { color: var(--blue); margin-top: 0; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        .price { font-size: 2rem; font-weight: 800; margin: 15px 0; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 750px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <div class="brand">classtech</div>
-    <div id="user-info">Olá, <b id="display-name"></b> | <span onclick="logout()" style="cursor:pointer; color:red">Sair</span></div>
 
-    <div class="card" id="auth-section">
+    <div class="auth-card" id="auth-box">
         <h2 id="auth-title">Criar Conta</h2>
         <input type="text" id="username" placeholder="Usuário">
         <input type="password" id="password" placeholder="Senha">
-        <button class="btn" onclick="handleAuth()" id="btn-text">Entrar na Classtech</button>
-        <span style="font-size: 0.8rem; color: var(--dim); cursor: pointer; display: block; margin-top: 15px;" onclick="toggleMode()">Trocar Login/Cadastro</span>
+        <button class="btn" onclick="handleAuth()" id="btn-action">Cadastrar</button>
+        <span class="toggle-link" onclick="toggleMode()" id="toggle-text">Já tem conta? Entrar</span>
     </div>
 
-    <div id="pricing">
+    <div id="pricing-section">
         <h1>Escolha seu Plano Premium</h1>
+        <p style="color: var(--dim)">Olá, <span id="user-display" style="color: white; font-weight: bold;"></span>! Selecione abaixo:</p>
         <div class="grid">
-            <div class="plan" onclick="pay('Bronze', '4.99')"><h3>Bronze</h3><p>R$ 4,99</p></div>
-            <div class="plan" onclick="pay('Prata', '6.99')"><h3>Prata</h3><p>R$ 6,99</p></div>
-            <div class="plan" onclick="pay('Ouro', '9.99')"><h3>Ouro</h3><p>R$ 9,99</p></div>
+            <div class="plan-card" onclick="startPayment('Bronze', '4.99')">
+                <h3>Bronze</h3>
+                <div class="price">R$ 4,99</div>
+                <button class="btn" style="padding: 10px;">Assinar</button>
+            </div>
+            <div class="plan-card" onclick="startPayment('Prata', '6.99')">
+                <h3>Prata</h3>
+                <div class="price">R$ 6,99</div>
+                <button class="btn" style="padding: 10px;">Assinar</button>
+            </div>
+            <div class="plan-card" onclick="startPayment('Ouro', '9.99')">
+                <h3>Ouro</h3>
+                <div class="price">R$ 9,99</div>
+                <button class="btn" style="padding: 10px;">Assinar</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Configuração direta do seu Database
         const firebaseConfig = {
-            apiKey: "AIzaSyAmKle92XghExeW4FFfxj0BGwKXZeuOTNI",
-            authDomain: "classtech-b1bf2.firebaseapp.com",
-            projectId: "classtech-b1bf2",
-            databaseURL: "https://classtech-b1bf2-default-rtdb.firebaseio.com/",
-            appId: "1:874592479779:web:312f0ff25ba0b46c1a9f96"
+            databaseURL: "https://classtech-b1bf2-default-rtdb.firebaseio.com/"
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getDatabase(app);
-        let isLogin = false;
 
-        window.toggleMode = () => { isLogin = !isLogin; document.getElementById('auth-title').innerText = isLogin ? 'Entrar' : 'Criar Conta'; };
+        let isLoginMode = false;
+        let loggedUser = null;
 
-        window.handleAuth = async () => {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value;
-            const email = `${user.toLowerCase()}@classtech.com`;
-            try {
-                if(!isLogin) {
-                    const res = await createUserWithEmailAndPassword(auth, email, pass);
-                    await set(ref(db, 'users/' + res.user.uid), { username: user, plan: 'free' });
-                } else { await signInWithEmailAndPassword(auth, email, pass); }
-            } catch (e) { alert(e.message); }
+        // Alternar entre Cadastro e Login
+        window.toggleMode = () => {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? 'Entrar' : 'Criar Conta';
+            document.getElementById('btn-action').innerText = isLoginMode ? 'Entrar' : 'Cadastrar';
+            document.getElementById('toggle-text').innerText = isLoginMode ? 'Não tem conta? Criar agora' : 'Já tem conta? Entrar';
         };
 
-        onAuthStateChanged(auth, async (u) => {
-            if(u) {
-                document.getElementById('auth-section').style.display = 'none';
-                document.getElementById('pricing').style.display = 'block';
-                document.getElementById('user-info').style.display = 'block';
-                const snap = await get(ref(db, 'users/' + u.uid));
-                if(snap.exists()) {
-                    document.getElementById('display-name').innerText = snap.val().username;
-                    // Lógica de Retorno do Mercado Pago
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if(urlParams.get('status') === 'approved') {
-                        const newPlan = urlParams.get('plan');
-                        await update(ref(db, 'users/' + u.uid), { plan: newPlan });
-                        alert(`Plano ${newPlan} ativado!`);
-                        window.history.replaceState({}, document.title, "/");
-                    }
-                }
+        // Lógica de Autenticação Manual
+        window.handleAuth = async () => {
+            const user = document.getElementById('username').value.trim().toLowerCase();
+            const pass = document.getElementById('password').value;
+
+            if(!user || !pass) return alert("Preencha todos os campos!");
+
+            const userRef = ref(db, 'accounts/' + user);
+            const snapshot = await get(userRef);
+
+            if(!isLoginMode) {
+                // Cadastro
+                if(snapshot.exists()) return alert("Esse usuário já existe!");
+                await set(userRef, {
+                    password: pass,
+                    plan: 'free',
+                    created: new Date().toISOString()
+                });
+                alert("Conta criada com sucesso!");
+                showPricing(user);
             } else {
-                document.getElementById('auth-section').style.display = 'block';
-                document.getElementById('pricing').style.display = 'none';
-                document.getElementById('user-info').style.display = 'none';
+                // Login
+                if(snapshot.exists() && snapshot.val().password === pass) {
+                    showPricing(user);
+                } else {
+                    alert("Usuário ou senha incorretos!");
+                }
             }
-        });
+        };
 
-        window.logout = () => signOut(auth);
+        function showPricing(user) {
+            loggedUser = user;
+            document.getElementById('auth-box').style.display = 'none';
+            document.getElementById('pricing-section').style.display = 'block';
+            document.getElementById('user-display').innerText = user;
+        }
 
-        window.pay = async (plan, price) => {
-            const res = await fetch('/api/create-preference', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: `Classtech ${plan}`, price: price, userId: auth.currentUser.uid })
-            });
-            const data = await res.json();
-            if(data.id) window.location.href = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${data.id}`;
+        // Chamar a sua API do Vercel
+        window.startPayment = async (plan, price) => {
+            try {
+                const response = await fetch('/api/create-preference', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: `Classtech ${plan}`,
+                        price: price,
+                        userId: loggedUser // Passando o usuário logado para a API
+                    })
+                });
+                const data = await response.json();
+                if(data.id) {
+                    window.location.href = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${data.id}`;
+                } else {
+                    alert("Erro ao gerar link de pagamento.");
+                }
+            } catch (e) {
+                alert("Erro ao conectar com a API.");
+            }
         };
     </script>
 </body>
