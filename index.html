@@ -4,71 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Classtech Hub</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { --bg: #0c0c0c; --card: #161616; --blue: #007aff; --text: #ffffff; --dim: #888; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .brand { position: absolute; top: 25px; left: 25px; font-weight: 800; color: var(--blue); }
+        .card { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid #222; width: 320px; text-align: center; }
+        input { width: 100%; padding: 14px; margin: 10px 0; background: #222; border: 1px solid #333; color: white; border-radius: 12px; box-sizing: border-box; outline: none; }
+        .btn { background: var(--blue); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 15px; }
+        #pricing { display: none; width: 90%; max-width: 900px; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
+        .plan { background: var(--card); padding: 30px; border-radius: 24px; border: 1px solid #222; cursor: pointer; transition: 0.3s; }
+        .plan:hover { border-color: var(--blue); transform: translateY(-5px); }
+        #user-info { position: absolute; top: 25px; right: 25px; font-size: 0.85rem; display: none; }
+        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
 
     <div class="brand">classtech</div>
+    <div id="user-info">Olá, <b id="display-name"></b> | <span onclick="logout()" style="cursor:pointer; color:red">Sair</span></div>
 
-    <div class="main-wrapper">
-        <header>
-            <h2>Escolha seu nível</h2>
-            <p>Acesso às ferramentas premium</p>
-        </header>
+    <div class="card" id="auth-section">
+        <h2 id="auth-title">Criar Conta</h2>
+        <input type="text" id="username" placeholder="Usuário">
+        <input type="password" id="password" placeholder="Senha">
+        <button class="btn" onclick="handleAuth()" id="btn-text">Entrar na Classtech</button>
+        <span style="font-size: 0.8rem; color: var(--dim); cursor: pointer; display: block; margin-top: 15px;" onclick="toggleMode()">Trocar Login/Cadastro</span>
+    </div>
 
-        <div class="pricing-grid">
-            <div class="plan-card" onclick="openPix('Bronze', '4,99')">
-                <div class="plan-name">Bronze</div>
-                <div class="plan-price">R$ 4,99 <span>/mês</span></div>
-                <ul class="features">
-                    <li>2 IAs Desbloqueadas</li>
-                    <li>SLA</li>
-                </ul>
-                <button class="btn-pay">Upgrade</button>
-            </div>
-
-            <div class="plan-card" onclick="openPix('Prata', '6,99')">
-                <div class="plan-name">Prata</div>
-                <div class="plan-price">R$ 6,99 <span>/mês</span></div>
-                <ul class="features">
-                    <li>Proxy Privado</li>
-                    <li>Navegação Clean</li>
-                </ul>
-                <button class="btn-pay">Upgrade</button>
-            </div>
-
-            <div class="plan-card" onclick="openPix('Ouro', '9,99')">
-                <div class="plan-name">Ouro</div>
-                <div class="plan-price">R$ 9,99 <span>/mês</span></div>
-                <ul class="features">
-                    <li>Acesso Total</li>
-                    <li>Suporte Prioritário</li>
-                </ul>
-                <button class="btn-pay">Upgrade</button>
-            </div>
+    <div id="pricing">
+        <h1>Escolha seu Plano Premium</h1>
+        <div class="grid">
+            <div class="plan" onclick="pay('Bronze', '4.99')"><h3>Bronze</h3><p>R$ 4,99</p></div>
+            <div class="plan" onclick="pay('Prata', '6.99')"><h3>Prata</h3><p>R$ 6,99</p></div>
+            <div class="plan" onclick="pay('Ouro', '9.99')"><h3>Ouro</h3><p>R$ 9,99</p></div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="checkout">
-        <div class="payment-box">
-            <p class="modal-tag">PAGAMENTO PIX</p>
-            <h3 id="plan-label">Plano</h3>
-            
-            <div class="qr-code">QR CODE AQUI</div>
-            
-            <p id="price-label"></p>
-            
-            <div class="pix-copy-box">
-                <input type="text" class="pix-input" id="pix-code" value="" readonly>
-                <button class="btn-copy" onclick="copyPix()">Copiar</button>
-            </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-            <p class="modal-footer-text">Após pagar, envie o comprovante no painel.</p>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmKle92XghExeW4FFfxj0BGwKXZeuOTNI",
+            authDomain: "classtech-b1bf2.firebaseapp.com",
+            projectId: "classtech-b1bf2",
+            databaseURL: "https://classtech-b1bf2-default-rtdb.firebaseio.com/",
+            appId: "1:874592479779:web:312f0ff25ba0b46c1a9f96"
+        };
 
-            <button onclick="closePix()" class="btn-cancel">Cancelar</button>
-        </div>
-    </div>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        let isLogin = false;
 
-    <script src="script.js"></script>
+        window.toggleMode = () => { isLogin = !isLogin; document.getElementById('auth-title').innerText = isLogin ? 'Entrar' : 'Criar Conta'; };
+
+        window.handleAuth = async () => {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            const email = `${user.toLowerCase()}@classtech.com`;
+            try {
+                if(!isLogin) {
+                    const res = await createUserWithEmailAndPassword(auth, email, pass);
+                    await set(ref(db, 'users/' + res.user.uid), { username: user, plan: 'free' });
+                } else { await signInWithEmailAndPassword(auth, email, pass); }
+            } catch (e) { alert(e.message); }
+        };
+
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('pricing').style.display = 'block';
+                document.getElementById('user-info').style.display = 'block';
+                const snap = await get(ref(db, 'users/' + u.uid));
+                if(snap.exists()) {
+                    document.getElementById('display-name').innerText = snap.val().username;
+                    // Lógica de Retorno do Mercado Pago
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if(urlParams.get('status') === 'approved') {
+                        const newPlan = urlParams.get('plan');
+                        await update(ref(db, 'users/' + u.uid), { plan: newPlan });
+                        alert(`Plano ${newPlan} ativado!`);
+                        window.history.replaceState({}, document.title, "/");
+                    }
+                }
+            } else {
+                document.getElementById('auth-section').style.display = 'block';
+                document.getElementById('pricing').style.display = 'none';
+                document.getElementById('user-info').style.display = 'none';
+            }
+        });
+
+        window.logout = () => signOut(auth);
+
+        window.pay = async (plan, price) => {
+            const res = await fetch('/api/create-preference', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: `Classtech ${plan}`, price: price, userId: auth.currentUser.uid })
+            });
+            const data = await res.json();
+            if(data.id) window.location.href = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${data.id}`;
+        };
+    </script>
 </body>
 </html>
